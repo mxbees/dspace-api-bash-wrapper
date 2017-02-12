@@ -7,36 +7,38 @@ JSON_HEADER='Accept: application/json'
 XML_HEADER='Accept: application/json'
 CONTENT_HEADER='Content-Type: application/json'
 TOKEN_HEADER="rest-dspace-token: $dspace_token"
-GET='curl -X GET -s'
-POST='curl -X POST -s'
-PUT='curl -X PUT -s'
-DELETE='curl -X DELETE -s'
+GET='wget --method=GET -q'
+POST='wget --method=POST -q'
+PUT='wget --method=PUT -q'
+DELETE='wget --method=DELETE -q'
+WGET='wget -q'
 
 #basic auth related stuff and testing
 
 test_api () {
-  $CMD $YORKSPACE/test
+  $GET -O- $YORKSPACE/test
 }
 
 get_documentation () {
-  $CMD $YORKSPACE -o rest_api_documentation.html
+  $GET $YORKSPACE -O dspace_api-documentation.html
 }
 
 yorkspace_login () {
   email=$1
   password=$2
   auth_data=$(jq -n -c --arg e $email --arg p $password '{"email":$e, "password":$p}')
-  token=$($CMD -H "$CONTENT_HEADER" -d $auth_data "$YORKSPACE/login")
+  token=$($WGET -O- --header="$CONTENT_HEADER" --post-data=$auth_data "$YORKSPACE/login")
   echo "dspace_token=$token" > .token.txt
 }
 
 yorkspace_logout () {
-  $CMD -X POST -H "$CONTENT_HEADER" -H "$TOKEN_HEADER" $YORKSPACE/logout
+  $POST -O- --header="$CONTENT_HEADER" --header="$TOKEN_HEADER" $YORKSPACE/logout
   echo "You're now logged out of the API"
 }
 
 token_status () {
-  status=$($CMD -H "$JSON_HEADER" -H "$CONTENT_HEADER" -H "$TOKEN_HEADER" $YORKSPACE/status)
+  #status=$($CMD -H "$JSON_HEADER" -H "$CONTENT_HEADER" -H "$TOKEN_HEADER" $YORKSPACE/status)
+  status=$($GET -O- --header="$JSON_HEADER" --header="$CONTENT_HEADER" --header="$TOKEN_HEADER" $YORKSPACE/status)
   echo $status
 }
 
@@ -51,6 +53,15 @@ command=$1
 shift
 
 case "$command" in
+  documentation)
+    get_documentation
+    shift
+  ;;
+  test)
+    test_api
+    echo ""
+    shift
+  ;;
   login)
     while getopts ':p:u:' opt; do
       case $opt in
