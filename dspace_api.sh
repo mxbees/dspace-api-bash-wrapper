@@ -26,8 +26,10 @@ get_documentation () {
 yorkspace_login () {
   email=$1
   password=$2
-  auth_data=$(jq -n -c --arg e $email --arg p $password '{"email":$e, "password":$p}')
-  token=$($WGET -O- --header="$CONTENT_HEADER" --post-data=$auth_data "$YORKSPACE/login")
+  #auth_data=$(jq -n -c --arg e $email --arg p $password '{"email":$e, "password":$p}')
+  token=$($WGET -O- --header="$CONTENT_HEADER" \
+  --post-data='{"email":"'"$email"'","password":"'"$password"'"}' \
+  "$YORKSPACE/login")
   echo "dspace_token=$token" > .token.txt
 }
 
@@ -37,7 +39,6 @@ yorkspace_logout () {
 }
 
 token_status () {
-  #status=$($CMD -H "$JSON_HEADER" -H "$CONTENT_HEADER" -H "$TOKEN_HEADER" $YORKSPACE/status)
   status=$($GET -O- --header="$JSON_HEADER" --header="$CONTENT_HEADER" --header="$TOKEN_HEADER" $YORKSPACE/status)
   echo $status
 }
