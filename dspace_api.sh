@@ -3,8 +3,7 @@
 . .token.txt
 
 YORKSPACE='https://yorkspace.library.yorku.ca/rest'
-JSON_HEADER='Accept: application/json'
-XML_HEADER='Accept: application/json'
+DATA_TYPE='Accept: application/json'
 CONTENT_HEADER='Content-Type: application/json'
 TOKEN_HEADER="rest-dspace-token: $dspace_token"
 GET='wget --method=GET -q'
@@ -12,6 +11,17 @@ POST='wget --method=POST -q'
 PUT='wget --method=PUT -q'
 DELETE='wget --method=DELETE -q'
 WGET='wget -q'
+
+#global options
+
+while getopts ":x" opts; do
+  case $opts in
+    x)
+      DATA_TYPE='Accept: application/xml'
+    ;;
+  esac
+done
+shift $((OPTIND -1))
 
 #basic auth related stuff and testing
 
@@ -26,7 +36,6 @@ get_documentation () {
 yorkspace_login () {
   email=$1
   password=$2
-  #auth_data=$(jq -n -c --arg e $email --arg p $password '{"email":$e, "password":$p}')
   token=$($WGET -O- --header="$CONTENT_HEADER" \
   --post-data='{"email":"'"$email"'","password":"'"$password"'"}' \
   "$YORKSPACE/login")
@@ -39,7 +48,7 @@ yorkspace_logout () {
 }
 
 token_status () {
-  status=$($GET -O- --header="$JSON_HEADER" --header="$CONTENT_HEADER" --header="$TOKEN_HEADER" $YORKSPACE/status)
+  status=$($GET -O- --header="$DATA_TYPE" --header="$CONTENT_HEADER" --header="$TOKEN_HEADER" $YORKSPACE/status)
   echo $status
 }
 
@@ -47,7 +56,7 @@ token_status () {
 
 get_all_collections () {
   #ll_collections=$(sdfs)
-  $CMD -H $JSON_HEADER $YORKSPACE/collections > yorkspace_collections.json
+  $GET --header="$DATA_TYPE" $YORKSPACE/collections -O yorkspace_collections.json
 }
 
 command=$1
@@ -90,7 +99,13 @@ case "$command" in
     shift
   ;;
   collections)
-    get_all_collections
+    subcommand=$1
+    case "$subcommand" in
+      all)
+        get_all_collections
+      shift
+      ;;
+    esac
   shift
   ;;
 esac
