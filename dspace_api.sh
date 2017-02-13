@@ -17,6 +17,7 @@ WGET='wget -q'
 while getopts ":x" opts; do
   case $opts in
     x)
+      #This allows the user to get XML as their response from the API. The default is JSON. If the '-x' flag is present, then the API will return XML. 
       DATA_TYPE='Accept: application/xml'
     ;;
   esac
@@ -52,13 +53,43 @@ token_status () {
   echo $status
 }
 
+#communities
+
+get_all_communities () {
+  $GET --header="$DATA_TYPE" $YORKSPACE/communities -O yorkspace_all_communities.$data_ext
+}
+
+get_top_communities () {
+  $GET --header="$DATA_TYPE" $YORKSPACE/communities/top-communities -O top_communities.$data_ext
+}
+
+get_community_info () {
+  $GET --header="$DATA_TYPE" $YORKSPACE/communities/$community_id -O $community_id.$data_ext
+}
+
 #collections
 
 get_all_collections () {
-  #ll_collections=$(sdfs)
-  $GET --header="$DATA_TYPE" $YORKSPACE/collections -O yorkspace_collections.json
+  $GET --header="$DATA_TYPE" $YORKSPACE/collections -O yorkspace_all_collections.$data_ext
 }
 
+get_top_collections () {
+  $GET --header="$DATA_TYPE" $YORKSPACE/collections/top-collections -O top_collections.$data_ext
+}
+
+#misc functions
+
+json_or_xml () {
+  api_call=$1
+  community_id=$2
+  if [ "$DATA_TYPE" == 'Accept: application/json' ]; then
+    data_ext='json'
+    $api_call
+  elif [ "$DATA_TYPE" == 'Accept: application/xml' ]; then
+    data_ext='xml'
+    $api_call
+  fi
+}
 command=$1
 shift
 
@@ -98,11 +129,29 @@ case "$command" in
     token_status
     shift
   ;;
+  communities)
+    subcommand=$1
+    case "$subcommand" in
+      all)
+        json_or_xml get_all_communities
+      shift
+      ;;
+      top)
+        json_or_xml get_top_communities
+      shift
+      ;;
+      info)
+        json_or_xml get_community_info $2
+      shift
+      ;;
+    esac
+  shift
+  ;;
   collections)
     subcommand=$1
     case "$subcommand" in
       all)
-        get_all_collections
+        json_or_xml get_all_collections
       shift
       ;;
     esac
