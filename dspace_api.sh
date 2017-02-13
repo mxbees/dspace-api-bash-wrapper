@@ -94,7 +94,3 @@ case "$command" in
   shift
   ;;
 esac
-
-#yorkspace_login 'nmpink@yorku.ca' "dspaceisforlosers"
-#yorkspace_logout
-#token_status
