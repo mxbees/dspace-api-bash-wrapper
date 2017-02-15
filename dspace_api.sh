@@ -67,6 +67,21 @@ get_community_info () {
   $GET --header="$DATA_TYPE" $YORKSPACE/communities/$community_id -O $community_id.$data_ext
 }
 
+get_community_communities () {
+  $GET --header="$DATA_TYPE" $YORKSPACE/communities/$community_id/communities -O community$community_id-sub_communities.$data_ext
+}
+
+get_community_collections () {
+  $GET --header="$DATA_TYPE" $YORKSPACE/communities/$community_id/collections -O community$community_id-collections.$data_ext
+}
+
+post_new_community () {
+  community_name=$1
+  $POST -O- --header=$CONTENT_HEADER --header=$TOKEN_HEADER \
+        --post_data='{"name":"'"$community_name"'"}' \
+        $YORKSPACE/communities
+}
+
 #collections
 
 get_all_collections () {
@@ -142,6 +157,18 @@ case "$command" in
       ;;
       info)
         json_or_xml get_community_info $2
+      shift
+      ;;
+      communities)
+        json_or_xml get_community_communities $2
+      shift
+      ;;
+      collections)
+        json_or_xml get_community_communities $2
+      shift
+      ;;
+      new)
+        post_new_community $2
       shift
       ;;
     esac
