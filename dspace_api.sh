@@ -93,6 +93,8 @@ get_top_collections () {
 }
 
 get_collection_items () {
+  limit=$1
+  offset=$2
   $GET --header="$DATA_TYPE" $YORKSPACE/collections/$id/items
 }
 
