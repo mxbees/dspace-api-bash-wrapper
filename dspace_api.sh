@@ -64,15 +64,15 @@ get_top_communities () {
 }
 
 get_community_info () {
-  $GET --header="$DATA_TYPE" $YORKSPACE/communities/$community_id -O $community_id.$data_ext
+  $GET --header="$DATA_TYPE" $YORKSPACE/communities/$id -O $id.$data_ext
 }
 
 get_community_communities () {
-  $GET --header="$DATA_TYPE" $YORKSPACE/communities/$community_id/communities -O community$community_id-sub_communities.$data_ext
+  $GET --header="$DATA_TYPE" $YORKSPACE/communities/$id/communities -O community$id-sub_communities.$data_ext
 }
 
 get_community_collections () {
-  $GET --header="$DATA_TYPE" $YORKSPACE/communities/$community_id/collections -O community$community_id-collections.$data_ext
+  $GET --header="$DATA_TYPE" $YORKSPACE/communities/$community_id/collections -O community$id-collections.$data_ext
 }
 
 post_new_community () {
@@ -92,11 +92,15 @@ get_top_collections () {
   $GET --header="$DATA_TYPE" $YORKSPACE/collections/top-collections -O top_collections.$data_ext
 }
 
+get_collection_items () {
+  $GET --header="$DATA_TYPE" $YORKSPACE/collections/$id/items
+}
+
 #misc functions
 
 json_or_xml () {
   api_call=$1
-  community_id=$2
+  id=$2
   if [ "$DATA_TYPE" == 'Accept: application/json' ]; then
     data_ext='json'
     $api_call
